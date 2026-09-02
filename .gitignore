@@ -1,28 +1,17 @@
 # Dependencies
 node_modules/
-client/node_modules/
-server/node_modules/
 
 # Environment files
 .env
-client/.env
-server/.env
+.env.local
+.env.*.local
 
-# Build
-client/dist/
-server/dist/
+# Vite build
+dist/
+
+# Frontend uploaded files
+server/uploads/
 
 # Logs
 *.log
 npm-debug.log*
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Uploads
-server/uploads/*
-
-!server/uploads/.gitkeep
-=======
-!server/uploads/.gitkeep   
