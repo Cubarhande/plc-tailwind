@@ -25,10 +25,7 @@ const aboutCategorySchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
-module.exports = mongoose.model(
-  "AboutCategory",
-  aboutCategorySchema
-);
+module.exports = mongoose.model("AboutCategory", aboutCategorySchema);

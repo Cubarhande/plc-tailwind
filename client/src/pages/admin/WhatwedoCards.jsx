@@ -1,13 +1,24 @@
 import { useEffect, useState } from "react";
-
 import { Plus, Edit, Trash2 } from "lucide-react";
+import toast from "react-hot-toast";
 
 import API from "../../services/api";
 import Modal from "../../components/admin/Modal";
 
 const IMAGE_URL = import.meta.env.VITE_IMAGE_URL || "http://localhost:5000";
 
-const Cards = () => {
+const emptyForm = {
+  category: "",
+  title: "",
+  description: "",
+  buttonText: "",
+  buttonLink: "",
+  displayOrder: 0,
+  backgroundColor: "#ffffff",
+  status: true,
+};
+
+const WhatwedoCards = () => {
   const [cards, setCards] = useState([]);
   const [categories, setCategories] = useState([]);
 
@@ -17,18 +28,8 @@ const Cards = () => {
   const [search, setSearch] = useState("");
   const [image, setImage] = useState(null);
 
-  /* ================= EMPTY FORM ================= */
-
-  const emptyForm = {
-    category: "",
-    title: "",
-    description: "",
-    buttonText: "",
-    buttonLink: "",
-    displayOrder: 0,
-    backgroundColor: "#ffffff",
-    status: true,
-  };
+  const [loading, setLoading] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
 
   const [form, setForm] = useState(emptyForm);
 
@@ -37,15 +38,20 @@ const Cards = () => {
   const fetchData = async () => {
     try {
       const [cardsRes, categoriesRes] = await Promise.all([
-        API.get(`/cards?search=${encodeURIComponent(search)}&limit=100`),
-        API.get("/categories"),
+        API.get(
+          `/WhatwedoCards?search=${encodeURIComponent(search)}&limit=100`,
+        ),
+        API.get("/WhatwedoCategories"),
       ]);
 
       setCards(cardsRes.data.data || []);
-
       setCategories(categoriesRes.data.data || []);
     } catch (error) {
       console.error("Failed to load cards:", error);
+
+      toast.error(
+        error.response?.data?.message || "Failed to load What We Do cards.",
+      );
     }
   };
 
@@ -56,10 +62,7 @@ const Cards = () => {
   /* ================= RESET ================= */
 
   const reset = () => {
-    setForm({
-      ...emptyForm,
-    });
-
+    setForm({ ...emptyForm });
     setImage(null);
     setEditingId(null);
   };
@@ -80,6 +83,16 @@ const Cards = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (!form.category) {
+      toast.error("Please select a category.");
+      return;
+    }
+
+    if (!form.title.trim()) {
+      toast.error("Card title is required.");
+      return;
+    }
+
     const data = new FormData();
 
     Object.entries(form).forEach(([key, value]) => {
@@ -91,21 +104,30 @@ const Cards = () => {
     }
 
     try {
+      setLoading(true);
+
       if (editingId) {
-        await API.put(`/cards/${editingId}`, data);
+        await API.put(`/WhatwedoCards/${editingId}`, data);
+
+        toast.success("Card updated successfully!");
       } else {
-        await API.post("/cards", data);
+        await API.post("/WhatwedoCards", data);
+
+        toast.success("Card created successfully!");
       }
 
       setOpen(false);
-
       reset();
 
-      fetchData();
+      await fetchData();
     } catch (error) {
-      console.error(error);
+      console.error("Card save error:", error);
 
-      alert(error.response?.data?.message || "Operation failed.");
+      toast.error(
+        error.response?.data?.message || "Operation failed. Please try again.",
+      );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -116,43 +138,79 @@ const Cards = () => {
 
     setForm({
       category: card.category?._id || card.category || "",
-
       title: card.title || "",
-
       description: card.description || "",
-
       buttonText: card.buttonText || "",
-
       buttonLink: card.buttonLink || "",
-
-      displayOrder: card.displayOrder || 0,
-
+      displayOrder: card.displayOrder ?? 0,
       backgroundColor: card.backgroundColor || "#ffffff",
-
       status: card.status ?? true,
     });
 
     setImage(null);
-
     setOpen(true);
   };
 
   /* ================= DELETE ================= */
 
-  const deleteCard = async (id) => {
-    if (!window.confirm("Delete this card?")) {
-      return;
-    }
+  const deleteCard = (id) => {
+    toast(
+      (t) => (
+        <div className="w-[350px] rounded-xl border border-slate-200 bg-white p-4 shadow-xl">
+          <div>
+            <h3 className="font-semibold text-slate-900">Delete this card?</h3>
 
-    try {
-      await API.delete(`/cards/${id}`);
+            <p className="mt-1 text-sm text-slate-500">
+              This action cannot be undone.
+            </p>
+          </div>
 
-      fetchData();
-    } catch (error) {
-      console.error(error);
+          <div className="mt-4 flex justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => toast.dismiss(t.id)}
+              className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50"
+            >
+              Cancel
+            </button>
 
-      alert(error.response?.data?.message || "Delete failed.");
-    }
+            <button
+              type="button"
+              disabled={deletingId === id}
+              onClick={async () => {
+                try {
+                  setDeletingId(id);
+
+                  toast.dismiss(t.id);
+
+                  await API.delete(`/WhatwedoCards/${id}`);
+
+                  toast.success("Card deleted successfully!");
+
+                  await fetchData();
+                } catch (error) {
+                  console.error("Delete card error:", error);
+
+                  toast.error(
+                    error.response?.data?.message ||
+                      "Delete failed. Please try again.",
+                  );
+                } finally {
+                  setDeletingId(null);
+                }
+              }}
+              className="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {deletingId === id ? "Deleting..." : "Delete"}
+            </button>
+          </div>
+        </div>
+      ),
+      {
+        duration: Infinity,
+        position: "top-right",
+      },
+    );
   };
 
   return (
@@ -201,26 +259,23 @@ const Cards = () => {
           <table className="w-full min-w-[850px] text-left text-sm">
             <thead className="bg-slate-50">
               <tr>
+                <th className="px-5 py-4">ID</th>
                 <th className="px-5 py-4">Image</th>
-
                 <th className="px-5 py-4">Title</th>
-
                 <th className="px-5 py-4">Category</th>
-
                 <th className="px-5 py-4">Color</th>
-
                 <th className="px-5 py-4">Order</th>
-
                 <th className="px-5 py-4">Status</th>
-
                 <th className="px-5 py-4">Actions</th>
               </tr>
             </thead>
 
             <tbody>
               {cards.length > 0 ? (
-                cards.map((card) => (
+                cards.map((card, index) => (
                   <tr key={card._id} className="border-t border-slate-100">
+                    <td className="px-5 py-4 font-medium">{index + 1}</td>
+
                     {/* IMAGE */}
 
                     <td className="px-5 py-4">
@@ -228,6 +283,7 @@ const Cards = () => {
                         <img
                           src={`${IMAGE_URL}${card.image}`}
                           alt={card.title}
+                          loading="lazy"
                           className="h-14 w-20 rounded-lg object-cover"
                         />
                       ) : (
@@ -298,7 +354,8 @@ const Cards = () => {
                         <button
                           type="button"
                           onClick={() => deleteCard(card._id)}
-                          className="rounded-lg bg-red-50 p-2 text-red-600 transition hover:bg-red-100"
+                          disabled={deletingId === card._id}
+                          className="rounded-lg bg-red-50 p-2 text-red-600 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
                           title="Delete"
                         >
                           <Trash2 size={16} />
@@ -310,7 +367,7 @@ const Cards = () => {
               ) : (
                 <tr>
                   <td
-                    colSpan="7"
+                    colSpan="8"
                     className="px-5 py-10 text-center text-slate-500"
                   >
                     No cards found.
@@ -328,6 +385,8 @@ const Cards = () => {
         open={open}
         title={editingId ? "Edit Card" : "Add Card"}
         onClose={() => {
+          if (loading) return;
+
           setOpen(false);
           reset();
         }}
@@ -469,9 +528,13 @@ const Cards = () => {
             <div className="flex items-center gap-3">
               <input
                 type="color"
-                name="backgroundColor"
                 value={form.backgroundColor}
-                onChange={handleChange}
+                onChange={(e) =>
+                  setForm((prev) => ({
+                    ...prev,
+                    backgroundColor: e.target.value,
+                  }))
+                }
                 className="h-12 w-16 cursor-pointer rounded-lg border border-slate-200 bg-white p-1"
               />
 
@@ -513,9 +576,16 @@ const Cards = () => {
 
           <button
             type="submit"
-            className="w-full rounded-lg bg-slate-900 py-3 font-semibold text-white transition hover:bg-slate-800"
+            disabled={loading}
+            className="w-full rounded-lg bg-slate-900 py-3 font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {editingId ? "Update Card" : "Create Card"}
+            {loading
+              ? editingId
+                ? "Updating..."
+                : "Creating..."
+              : editingId
+                ? "Update Card"
+                : "Create Card"}
           </button>
         </form>
       </Modal>
@@ -523,4 +593,4 @@ const Cards = () => {
   );
 };
 
-export default Cards;
+export default WhatwedoCards;

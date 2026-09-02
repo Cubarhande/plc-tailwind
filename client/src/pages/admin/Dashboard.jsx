@@ -22,14 +22,41 @@ const Dashboard = () => {
     causes: 0,
     partners: 0,
     events: 0,
+    eventCards: 0,
     messages: 0,
+    resourceCategories: 0,
+    resourceCards: 0,
   });
 
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  /* =====================================================
+     GET API LIST DATA SAFELY
+  ===================================================== */
+
+  const getList = (response) => {
+    if (Array.isArray(response?.data?.data)) {
+      return response.data.data;
+    }
+
+    if (Array.isArray(response?.data)) {
+      return response.data;
+    }
+
+    return [];
+  };
+
+  /* =====================================================
+     LOAD DASHBOARD DATA
+  ===================================================== */
 
   useEffect(() => {
     const loadStats = async () => {
       try {
+        setLoading(true);
+        setError("");
+
         const [
           heroRes,
           aboutCategoriesRes,
@@ -39,50 +66,57 @@ const Dashboard = () => {
           causesRes,
           partnersRes,
           eventsRes,
+          eventCardsRes,
           contactsRes,
+          resourceCategoriesRes,
+          resourceCardsRes,
         ] = await Promise.all([
           API.get("/hero"),
           API.get("/about-categories"),
           API.get("/about-cards"),
-          API.get("/categories"),
-          API.get("/cards"),
+          API.get("/whatwedocategories"),
+          API.get("/whatwedocards"),
           API.get("/causes"),
           API.get("/partners"),
           API.get("/events"),
+          API.get("/event-cards"),
           API.get("/contacts"),
+          API.get("/resource-categories"),
+          API.get("/resource-cards"),
         ]);
 
+        const heroData = getList(heroRes);
+
         setStats({
-          hero: heroRes.data?.data ? 1 : 0,
+          hero: heroData.length,
 
-          aboutCategories:
-            aboutCategoriesRes.data?.data?.length || 0,
+          aboutCategories: getList(aboutCategoriesRes).length,
 
-          aboutCards:
-            aboutCardsRes.data?.data?.length || 0,
+          aboutCards: getList(aboutCardsRes).length,
 
-          categories:
-            categoriesRes.data?.data?.length || 0,
+          categories: getList(categoriesRes).length,
 
-          cards:
-            cardsRes.data?.data?.length || 0,
+          cards: getList(cardsRes).length,
 
-          causes:
-            causesRes.data?.data?.length || 0,
+          causes: getList(causesRes).length,
 
-          partners:
-            partnersRes.data?.data?.length || 0,
+          partners: getList(partnersRes).length,
 
-          events:
-            eventsRes.data?.data?.length || 0,
+          events: getList(eventsRes).length,
 
-          messages:
-            contactsRes.data?.data?.length || 0,
+          eventCards: getList(eventCardsRes).length,
+
+          messages: getList(contactsRes).length,
+
+          resourceCategories: getList(resourceCategoriesRes).length,
+
+          resourceCards: getList(resourceCardsRes).length,
         });
-      } catch (error) {
-        console.error(
-          "Failed to load dashboard:",
-          error
+      } catch (err) {
+        console.error("Failed to load dashboard:", err);
+
+        setError(
+          err.response?.data?.message || "Unable to load dashboard statistics.",
         );
       } finally {
         setLoading(false);
@@ -91,6 +125,10 @@ const Dashboard = () => {
 
     loadStats();
   }, []);
+
+  /* =====================================================
+     STATISTICS
+  ===================================================== */
 
   const statsCards = [
     {
@@ -134,6 +172,21 @@ const Dashboard = () => {
       icon: CalendarDays,
     },
     {
+      title: "Event Cards",
+      value: stats.eventCards,
+      icon: CreditCard,
+    },
+    {
+      title: "Resource Categories",
+      value: stats.resourceCategories,
+      icon: FileText,
+    },
+    {
+      title: "Resource Cards",
+      value: stats.resourceCards,
+      icon: CreditCard,
+    },
+    {
       title: "Contact Messages",
       value: stats.messages,
       icon: MessageSquare,
@@ -141,49 +194,98 @@ const Dashboard = () => {
   ];
 
   return (
-    <div>
-      {/* HEADER */}
+    <div className="min-h-screen bg-slate-50 p-1">
+      {/* =====================================================
+          HEADER
+      ===================================================== */}
+
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-900">
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
           Dashboard
         </h1>
 
-        <p className="mt-1 text-sm text-slate-500">
-          Manage your PLC website content.
+        <p className="mt-2 text-sm text-slate-500">
+          Manage and monitor your PLC website content.
         </p>
       </div>
 
-      {/* STATS */}
-      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      {/* =====================================================
+          ERROR
+      ===================================================== */}
+
+      {error && (
+        <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {error}
+        </div>
+      )}
+
+      {/* =====================================================
+          STATISTICS
+      ===================================================== */}
+
+      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {statsCards.map((item) => {
           const Icon = item.icon;
 
           return (
             <div
               key={item.title}
-              className="rounded-xl bg-white p-5 shadow-sm"
+              className="
+                group
+                rounded-2xl
+                border
+                border-slate-200
+                bg-white
+                p-5
+                shadow-sm
+                transition-all
+                duration-300
+                hover:-translate-y-1
+                hover:border-slate-300
+                hover:shadow-lg
+              "
             >
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-slate-500">
+              <div className="flex items-center justify-between gap-4">
+                {/* CONTENT */}
+
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-medium text-slate-500">
                     {item.title}
                   </p>
 
-                  <p className="mt-2 text-3xl font-bold text-slate-900">
-                    {loading ? "..." : item.value}
-                  </p>
+                  <div className="mt-2">
+                    {loading ? (
+                      <div className="h-9 w-14 animate-pulse rounded-lg bg-slate-200" />
+                    ) : (
+                      <p className="text-3xl font-bold tracking-tight text-slate-900">
+                        {item.value}
+                      </p>
+                    )}
+                  </div>
                 </div>
 
-                <div className="rounded-lg bg-slate-100 p-3 text-slate-700">
-                  <Icon size={22} />
+                {/* ICON */}
+
+                <div
+                  className="
+                    shrink-0
+                    rounded-xl
+                    bg-slate-100
+                    p-3
+                    text-slate-700
+                    transition-all
+                    duration-300
+                    group-hover:bg-slate-900
+                    group-hover:text-white
+                  "
+                >
+                  <Icon size={22} strokeWidth={2} />
                 </div>
               </div>
             </div>
           );
         })}
       </div>
-
-     
     </div>
   );
 };

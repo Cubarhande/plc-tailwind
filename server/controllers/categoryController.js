@@ -1,14 +1,14 @@
-const Category = require("../models/Category");
+const WhatwedoCategories = require("../models/WhatwedoCategories");
 const WhatWeDoCard = require("../models/WhatWeDoCard");
 
-exports.createCategory = async (req, res) => {
+exports.createWhatwedoCategories = async (req, res) => {
   try {
-    const category = await Category.create(req.body);
+    const WhatwedoCategories = await WhatwedoCategories.create(req.body);
 
     res.status(201).json({
       success: true,
-      message: "Category created successfully.",
-      data: category
+      message: "WhatwedoCategories created successfully.",
+      data: WhatwedoCategories
     });
   } catch (error) {
     res.status(500).json({
@@ -20,7 +20,7 @@ exports.createCategory = async (req, res) => {
 
 exports.getCategories = async (req, res) => {
   try {
-    const categories = await Category.find()
+    const categories = await WhatwedoCategories.find()
       .sort({ displayOrder: 1 });
 
     res.json({
@@ -35,22 +35,22 @@ exports.getCategories = async (req, res) => {
   }
 };
 
-exports.getCategory = async (req, res) => {
+exports.getWhatwedoCategories = async (req, res) => {
   try {
-    const category = await Category.findById(
+    const WhatwedoCategories = await WhatwedoCategories.findById(
       req.params.id
     );
 
-    if (!category) {
+    if (!WhatwedoCategories) {
       return res.status(404).json({
         success: false,
-        message: "Category not found."
+        message: "WhatwedoCategories not found."
       });
     }
 
     res.json({
       success: true,
-      data: category
+      data: WhatwedoCategories
     });
   } catch (error) {
     res.status(500).json({
@@ -60,10 +60,10 @@ exports.getCategory = async (req, res) => {
   }
 };
 
-exports.updateCategory = async (req, res) => {
+exports.updateWhatwedoCategories = async (req, res) => {
   try {
-    const category =
-      await Category.findByIdAndUpdate(
+    const WhatwedoCategories =
+      await WhatwedoCategories.findByIdAndUpdate(
         req.params.id,
         req.body,
         {
@@ -72,17 +72,17 @@ exports.updateCategory = async (req, res) => {
         }
       );
 
-    if (!category) {
+    if (!WhatwedoCategories) {
       return res.status(404).json({
         success: false,
-        message: "Category not found."
+        message: "WhatwedoCategories not found."
       });
     }
 
     res.json({
       success: true,
-      message: "Category updated successfully.",
-      data: category
+      message: "WhatwedoCategories updated successfully.",
+      data: WhatwedoCategories
     });
   } catch (error) {
     res.status(500).json({
@@ -92,28 +92,28 @@ exports.updateCategory = async (req, res) => {
   }
 };
 
-exports.deleteCategory = async (req, res) => {
+exports.deleteWhatwedoCategories = async (req, res) => {
   try {
-    const category =
-      await Category.findByIdAndDelete(
+    const WhatwedoCategories =
+      await WhatwedoCategories.findByIdAndDelete(
         req.params.id
       );
 
-    if (!category) {
+    if (!WhatwedoCategories) {
       return res.status(404).json({
         success: false,
-        message: "Category not found."
+        message: "WhatwedoCategories not found."
       });
     }
 
     await WhatWeDoCard.deleteMany({
-      category: category._id
+      WhatwedoCategories: WhatwedoCategories._id
     });
 
     res.json({
       success: true,
       message:
-        "Category and related cards deleted successfully."
+        "WhatwedoCategories and related cards deleted successfully."
     });
   } catch (error) {
     res.status(500).json({

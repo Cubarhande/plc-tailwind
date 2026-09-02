@@ -1,17 +1,40 @@
+import { useState } from "react";
 import { Outlet } from "react-router-dom";
 
 import Sidebar from "./Sidebar";
 import Topbar from "./Topbar";
 
 const AdminLayout = () => {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const openSidebar = () => {
+    setSidebarOpen(true);
+  };
+
+  const closeSidebar = () => {
+    setSidebarOpen(false);
+  };
+
   return (
-    <div className="min-h-screen bg-slate-100">
-      <Sidebar />
+    <div className="min-h-screen overflow-x-hidden bg-slate-100">
+      {/* =====================================================
+          SIDEBAR
+      ====================================================== */}
 
-      <div className="ml-64">
-        <Topbar   />
+      <Sidebar isOpen={sidebarOpen} onClose={closeSidebar} />
 
-        <main className="p-6">
+      {/* =====================================================
+          MAIN CONTENT
+      ====================================================== */}
+
+      <div className="min-w-0 md:ml-64">
+        {/* TOPBAR */}
+
+        <Topbar onMenuClick={openSidebar} title="PLC Admin" />
+
+        {/* PAGE CONTENT */}
+
+        <main className="min-w-0 p-3 sm:p-4 md:p-6">
           <Outlet />
         </main>
       </div>

@@ -4,53 +4,60 @@ const cardSchema = new mongoose.Schema(
   {
     category: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Category",
-      required: true
+      ref: "WhatwedoCategories",
+      required: true,
     },
 
     title: {
       type: String,
       required: true,
-      trim: true
+      trim: true,
     },
 
     description: {
       type: String,
-      default: ""
+      default: "",
+      trim: true,
     },
 
     image: {
       type: String,
-      default: ""
+      default: "",
     },
 
     buttonText: {
       type: String,
-      default: ""
+      default: "",
+      trim: true,
     },
 
     buttonLink: {
       type: String,
-      default: ""
+      default: "",
+      trim: true,
     },
 
     displayOrder: {
       type: Number,
-      default: 0
+      default: 0,
     },
+
     backgroundColor: {
-  type: String,
-  default: "#ffffff",
-},
+      type: String,
+      default: "#ffffff",
+    },
 
     status: {
       type: Boolean,
-      default: true
-    }
+      default: true,
+    },
   },
   {
-    timestamps: true
+    timestamps: true,
   }
 );
 
-module.exports = mongoose.model("WhatWeDoCard", cardSchema);
+module.exports = mongoose.model(
+  "WhatWeDoCard",
+  cardSchema
+);

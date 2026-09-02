@@ -7,6 +7,12 @@ const settingsSchema = new mongoose.Schema(
       default: "",
       trim: true,
     },
+    
+    siteFooter: {
+      type: String,
+      default: "",
+      trim: true,
+    },
 
     email: {
       type: String,

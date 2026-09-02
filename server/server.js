@@ -48,11 +48,7 @@ const heroRoutes = require("./routes/heroRoutes");
 
 const aboutRoutes = require("./routes/aboutRoutes");
 const aboutCategoryRoutes = require("./routes/aboutCategoryRoutes");
-const aboutCardRoutes = require("./routes/aboutCardRoutes");
-
-const categoryRoutes = require("./routes/categoryRoutes");
-
-const cardRoutes = require("./routes/cardRoutes");
+const aboutCardRoutes = require("./routes/aboutCardRoutes"); 
 
 const causeRoutes = require("./routes/causeRoutes");
 
@@ -60,11 +56,15 @@ const partnerRoutes = require("./routes/partnerRoutes");
 
 const eventRoutes = require("./routes/eventRoutes");
 const eventCardRoutes = require("./routes/eventCardRoutes");
+const resourceCategoryRoutes = require("./routes/resourceCategoryRoutes");
 
+const resourceCardRoutes = require("./routes/resourceCardRoutes");
 const contactRoutes = require("./routes/contactRoutes");
 
 const settingsRoutes = require("./routes/settingsRoutes");
+const whatwedoCategoryRoutes = require("./routes/whatwedoCategoryRoutes");
 
+const whatWeDoCardRoutes = require("./routes/whatWeDoCardRoutes");
 /* =========================
      API ROUTES
   ========================= */
@@ -79,9 +79,7 @@ app.use("/api/about-categories", aboutCategoryRoutes);
 
 app.use("/api/about-cards", aboutCardRoutes);
 
-app.use("/api/categories", categoryRoutes);
-
-app.use("/api/cards", cardRoutes);
+ 
 
 app.use("/api/causes", causeRoutes);
 
@@ -90,10 +88,16 @@ app.use("/api/partners", partnerRoutes);
 app.use("/api/events", eventRoutes);
 app.use("/api/event-cards", eventCardRoutes);
 
+app.use("/api/resource-categories", resourceCategoryRoutes);
+
+app.use("/api/resource-cards", resourceCardRoutes);
+
 app.use("/api/contacts", contactRoutes);
 
 app.use("/api/settings", settingsRoutes);
+app.use("/api/whatwedocategories", whatwedoCategoryRoutes);
 
+app.use("/api/whatwedocards", whatWeDoCardRoutes);
 /* =========================
      HOME
   ========================= */

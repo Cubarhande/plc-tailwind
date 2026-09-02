@@ -49,6 +49,7 @@ const updateSettings = async (req, res) => {
       twitter,
       linkedin,
       youtube,
+      siteFooter,
     } = req.body;
 
     let settings = await Settings.findOne();
@@ -59,6 +60,7 @@ const updateSettings = async (req, res) => {
 
     // Text fields
     settings.siteName = siteName || "";
+    settings.siteFooter = siteFooter || "";
     settings.email = email || "";
     settings.phone = phone || "";
     settings.address = address || "";

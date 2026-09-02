@@ -16,7 +16,7 @@ const router = express.Router();
 
 router.get("/", getCards);
 
-router.get("/category/:categoryId", getCardsByCategory);
+router.get("/whatwedocategories/:categoryId", getCardsByCategory);
 
 router.get("/:id", getCard);
 
